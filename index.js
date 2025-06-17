@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const { urlRouter } = require('./routes/url');
 const { staticRouter } = require('./routes/staticRouter');
 const userRoute = require('./routes/user');
-const { restrictToLoginUserOnly, checkAuth } = require('./middlewares/auth')
+const { restrictToLoginUserOnly, checkAuth, restrictTo, checkForAuthentication } = require('./middlewares/auth')
 
 const app = express();
 
@@ -15,13 +15,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(checkForAuthentication); // new always check
+
 
 
 
 // Register routes
-app.use("/url", restrictToLoginUserOnly, urlRouter);
+// app.use("/url", restrictToLoginUserOnly, urlRouter);
+app.use("/url", restrictTo(['NORMAL', 'ADMIN']), urlRouter);
 app.use('/user', userRoute);
-app.use("/", checkAuth, staticRouter);
+// app.use("/", checkAuth, staticRouter);
+app.use("/", staticRouter);
 
 /// view engien set
 app.set("view engine", "ejs");
